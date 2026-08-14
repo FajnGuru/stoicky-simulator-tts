@@ -852,13 +852,41 @@
 
         await audio.play();
 
-    } catch (err) {
-        console.warn('TTS proxy failed, falling back to Browser SpeechSynthesis:', err);
-        this.playBrowserTTS(text);
-    } finally {
-        this.ttsLoading = false;
-    }
-},
+                    async playGeminiTTS(text, voiceName) {
+                    // Voláme naši Vercel Edge Function místo přímo Gemini
+                    // ... celá tvoje stávající metoda ...
+                    } finally {
+                        this.ttsLoading = false;
+                    }
+                },
+
+                // ========== TADY ZAČÍNÁ NOVÝ BLOK ==========
+                playCachedAudio(index) {
+                    // ...
+                },
+
+                playBrowserTTS(text) {
+                    // ...
+                },
+
+                stopAudio() {
+                    // ...
+                },
+
+                base64ToArrayBuffer(base64) {
+                    // ...
+                },
+
+                pcmToWav(pcm16, sampleRate = 24000) {
+                    // ...
+                },
+
+                writeString(view, offset, string) {
+                    // ...
+                },
+                // ========== TADY KONČÍ NOVÝ BLOK ==========
+
+                geminiApiKey: localStorage.getItem('gemini_tts_api_key') || '',
 
                 geminiApiKey: localStorage.getItem('gemini_tts_api_key') || '',
 

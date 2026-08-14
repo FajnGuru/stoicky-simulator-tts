@@ -1,0 +1,31 @@
+[
+  {
+    "id": "01",
+    "category": "Titulní Snímek",
+    "layout": "title",
+    "badge": "Gemini AI Simulator",
+    "title": "Stoický Simulátor v Aplikaci",
+    "subtitle": "Trénink „svalu proti odmítnutí“ & výcvik mentality hojnosti v reálném čase",
+    "narrationScript": "Vítejte u prezentace Stoického Simulátoru. Dnes si předvedeme, jak moderní umělá inteligence Gemini učí uživatele trénovat sval proti odmítnutí a udržet si vnitřní klid i vysoký status v libovolné konverzaci.",
+    "audio": {
+      "zephyr": "audio/slide-01-zephyr.wav",
+      "puck": "audio/slide-01-puck.wav",
+      "kore": "audio/slide-01-kore.wav",
+      "aoede": "audio/slide-01-aoede.wav"
+    }
+  },
+  {
+    "id": "02",
+    "category": "Úvod & Architektura",
+    "layout": "section_title",
+    "title": "1. Architektura & Princip Interakce",
+    "subtitle": "Jak probíhá zpracování uživatelského vstupu přes Gemini 3.1 AI v reálném čase",
+    "narrationScript": "První část je věnována architektuře a principu interakce. Podíváme se na to, jak systém v reálném čase zpracovává zprávy od uživatele a generuje psychologickou zpětnou vazbu.",
+    "audio": {
+      "zephyr": "audio/slide-02-zephyr.wav",
+      "puck": "audio/slide-02-puck.wav",
+      "kore": "audio/slide-02-kore.wav",
+      "aoede": "audio/slide-02-aoede.wav"
+    }
+  }
+]

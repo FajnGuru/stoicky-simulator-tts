@@ -1,12 +1,12 @@
 [
   {
-    "id": "01",
     "category": "Titulní Snímek",
     "layout": "title",
     "badge": "Gemini AI Simulator",
     "title": "Stoický Simulátor v Aplikaci",
     "subtitle": "Trénink „svalu proti odmítnutí“ & výcvik mentality hojnosti v reálném čase",
     "narrationScript": "Vítejte u prezentace Stoického Simulátoru. Dnes si předvedeme, jak moderní umělá inteligence Gemini učí uživatele trénovat sval proti odmítnutí a udržet si vnitřní klid i vysoký status v libovolné konverzaci.",
+    "id": "01",
     "audio": {
       "zephyr": "audio/slide-01-zephyr.wav",
       "puck": "audio/slide-01-puck.wav",
@@ -15,17 +15,239 @@
     }
   },
   {
-    "id": "02",
     "category": "Úvod & Architektura",
     "layout": "section_title",
     "title": "1. Architektura & Princip Interakce",
     "subtitle": "Jak probíhá zpracování uživatelského vstupu přes Gemini 3.1 AI v reálném čase",
     "narrationScript": "První část je věnována architektuře a principu interakce. Podíváme se na to, jak systém v reálném čase zpracovává zprávy od uživatele a generuje psychologickou zpětnou vazbu.",
+    "id": "02",
     "audio": {
       "zephyr": "audio/slide-02-zephyr.wav",
       "puck": "audio/slide-02-puck.wav",
       "kore": "audio/slide-02-kore.wav",
       "aoede": "audio/slide-02-aoede.wav"
+    }
+  },
+  {
+    "category": "Příprava Konverzace",
+    "layout": "two_column_tiled",
+    "title": "1. Výchozí Situace & Volba Archetypu",
+    "tiles": [
+      {
+        "heading": "Výběr Archetypu",
+        "text": "Uživatel zvolí cílový profil (např. 🧗 <strong>Sarkastická outdooristka Katka, 28 let</strong>) se specifickou osobností a tolerancí vůči klišé."
+      },
+      {
+        "heading": "Zadání Otvíráku",
+        "text": "Napište zprávu pro otestování: <em>„Pod těmi černými brýlemi si určitě dáváš šlofíka... Kdo dneska vyhrál?“</em>"
+      }
+    ],
+    "narrationScript": "Konverzace začíná výběrem cílového archetypu. Uživatel zvolí osobnost, jako je například sarkastická outdooristka Katka, a odešle jí svůj úvodní otvírák.",
+    "id": "03",
+    "audio": {
+      "zephyr": "audio/slide-03-zephyr.wav",
+      "puck": "audio/slide-03-puck.wav",
+      "kore": "audio/slide-03-kore.wav",
+      "aoede": "audio/slide-03-aoede.wav"
+    }
+  },
+  {
+    "category": "Logika na Pozadí",
+    "layout": "tiled_icons",
+    "title": "2. Co se děje na pozadí (Gemini 3.1 AI)",
+    "cards": [
+      {
+        "icon": "<i class=\"fa-solid fa-user-ninja\"></i>",
+        "heading": "Roleplay Reakce",
+        "text": "AI převezme roli dívky a odpoví realisticky, hravě nebo lehce provokativně na základě vybraného archetypu."
+      },
+      {
+        "icon": "<i class=\"fa-solid fa-chart-bar\"></i>",
+        "heading": "Hodnocení Kvality",
+        "text": "Systém přidělí skóre (1–10) a poskytne stručný zpětnovazební komentář ke zprávě uživatele."
+      },
+      {
+        "icon": "<i class=\"fa-solid fa-brain\"></i>",
+        "heading": "Stoický Mentální Postup",
+        "text": "Pokud je odpověď chladná či odmítavá, AI vygeneruje vnitřní mentální příručku pro zachování statusu."
+      }
+    ],
+    "narrationScript": "Na pozadí přebírá řízení Gemini AI. Ta okamžitě vygeneruje realistickou odpoveď v roli dívky, ohodnotí kvalitu zprávy a v případě odmítnutí sestaví stoický návod do hlavy.",
+    "id": "04",
+    "audio": {
+      "zephyr": "audio/slide-04-zephyr.wav",
+      "puck": "audio/slide-04-puck.wav",
+      "kore": "audio/slide-04-kore.wav",
+      "aoede": "audio/slide-04-aoede.wav"
+    }
+  },
+  {
+    "category": "Uživatelské Rozhraní",
+    "layout": "highlight_numbers",
+    "title": "Vizuální Zobrazení v Uživatelském UI",
+    "number": "3",
+    "numberLabel": "Propojené Vrstvy Odpovědi",
+    "heading": "Okamžitý Feedback & Mentální Rámec",
+    "description": "Uživatel nevidí pouze chatovou bublinu. Aplikace mu paralelně servíruje <strong>objektivní skóre</strong> a především <strong>zlatou stoickou kartu</strong>, která zabraňuje reaktivnímu jednání, omluvám a ztrátě sebedůvěry.",
+    "narrationScript": "V rozhraní se uživateli zobrazují tři propojené vrstvy. Vedle konverzační bubliny a skóre získává zlatou stoickou kartu, která brání reaktivním omluvám.",
+    "id": "05",
+    "audio": {
+      "zephyr": "audio/slide-05-zephyr.wav",
+      "puck": "audio/slide-05-puck.wav",
+      "kore": "audio/slide-05-kore.wav",
+      "aoede": "audio/slide-05-aoede.wav"
+    }
+  },
+  {
+    "category": "Stoický Rámec",
+    "layout": "section_title",
+    "title": "2. Zlatá Karta: Stoický Mentální Postup",
+    "subtitle": "3 kroky k udržení vnitřního klidu a sociálního statusu při odmítnutí",
+    "narrationScript": "Druhá kapitola se zaměřuje na Zlatou kartu a stoický mentální postup. Představuje tři klíčové kroky k udržení vnitřního klidu a sociální dominance.",
+    "id": "06",
+    "audio": {
+      "zephyr": "audio/slide-06-zephyr.wav",
+      "puck": "audio/slide-06-puck.wav",
+      "kore": "audio/slide-06-kore.wav",
+      "aoede": "audio/slide-06-aoede.wav"
+    }
+  },
+  {
+    "category": "Mentální Kroky",
+    "layout": "bullet_points",
+    "title": "Kroky Mentální Reakce v Hlavě",
+    "items": [
+      {
+        "icon": "fa-solid fa-magnifying-glass",
+        "title": "1. Analýza v hlavě",
+        "text": "Registruješ provokaci či odmítnutí. Uvědomíš si, že neodráží tvou lidskou hodnotu, ale rozpoložení dívky. Nevezmeš si to osobně."
+      },
+      {
+        "icon": "fa-solid fa-shield-halved",
+        "title": "2. Zachování statusu",
+        "text": "Odmítneš impuls k defenzivě („Zoufalý to není!“) nebo omluvám. Zachováš nadhled a sociální dominanci."
+      },
+      {
+        "icon": "fa-solid fa-seedling",
+        "title": "3. Posun k hojnosti",
+        "text": "Odmítnutí chápeš jako rychlý filtr. Posiluješ sval sociální odolnosti a přesouváš pozornost k příležitostem, které o kontakt stojí."
+      }
+    ],
+    "narrationScript": "Prvním krokem je neosobní analýza situace. Druhým krokem je odmítnutí defenzivy a omluv. Třetím krokem je posun k mentalitě hojnosti a dalším příležitostem.",
+    "id": "07",
+    "audio": {
+      "zephyr": "audio/slide-07-zephyr.wav",
+      "puck": "audio/slide-07-puck.wav",
+      "kore": "audio/slide-07-kore.wav",
+      "aoede": "audio/slide-07-aoede.wav"
+    }
+  },
+  {
+    "category": "Psychologická Odolnost",
+    "layout": "image_side",
+    "title": "Budování Odolnosti",
+    "heading": "Sval Proti Odmítnutí",
+    "description": "Trénink v simulátoru učí uživatele vnímat negativní či provokativní reakce jako neutrální data, nikoliv jako osobní selhání.",
+    "quote": "„Každý to má jinak. Chápu, měj se fajn. 👋“",
+    "quoteNote": "(S okamžitým odchodem z konverzace bez obhajování)",
+    "imageUrl": "https://media.easy-peasy.ai/b0ae662f-84c8-41c2-926b-a2cd25b68f93/8418d7fb-ef7f-48ed-a4b7-31e1c3c2da68_medium.webp",
+    "narrationScript": "Trénink posiluje sval sociální odolnosti. Místo vysvětlování se uživatel naučí poslat elegantní, nadhledovou odpoveď a okamžitě jít dál.",
+    "id": "08",
+    "audio": {
+      "zephyr": "audio/slide-08-zephyr.wav",
+      "puck": "audio/slide-08-puck.wav",
+      "kore": "audio/slide-08-kore.wav",
+      "aoede": "audio/slide-08-aoede.wav"
+    }
+  },
+  {
+    "category": "Srovnávací Analýza",
+    "layout": "table",
+    "title": "Porovnání: Reaktivita vs. Stoická Hojnost",
+    "rows": [
+      {
+        "category": "Vnitřní interpretace",
+        "reactive": "„Selhal jsem, vzala si to osobně, musím to zachránit.“",
+        "stoic": "„Jde o test nebo rychlý filtr. Má hodnota se nemění.“"
+      },
+      {
+        "category": "Slovní odpověď",
+        "reactive": "Omluvy („Promiň, myslel jsem to vtipně“) nebo hněv.",
+        "stoic": "Stručné, nad věcí, přátelské ukončení bez obhajoby."
+      },
+      {
+        "category": "Další postup",
+        "reactive": "Sledování profilu, frustrace, ztráta sebedůvěry.",
+        "stoic": "Okamžitý posun k novým příležitostem (Mentalita hojnosti)."
+      }
+    ],
+    "narrationScript": "Podívejme se na porovnání reakcí. Zatímco reaktivní přístup vede k omluvám a frustraci, stoický přístup udržuje vysokou hodnotu a přináší klid.",
+    "id": "09",
+    "audio": {
+      "zephyr": "audio/slide-09-zephyr.wav",
+      "puck": "audio/slide-09-puck.wav",
+      "kore": "audio/slide-09-kore.wav",
+      "aoede": "audio/slide-09-aoede.wav"
+    }
+  },
+  {
+    "category": "Cesta Růstu",
+    "layout": "timeline",
+    "title": "Cesta Růstu Uživatele v Simulátoru",
+    "steps": [
+      {
+        "title": "1. Testování",
+        "description": "Zadání prvotního otvíráku do simulátoru chatu."
+      },
+      {
+        "title": "2. AI Odraz",
+        "description": "Získání simulované odmítavé či hravé reakce."
+      },
+      {
+        "title": "3. Stoický Rámec",
+        "description": "Aplikace mentálního postupu z Zlaté karty."
+      },
+      {
+        "title": "4. Hojnost",
+        "description": "Osvojení vnitřního klidu a nadhledu v reálu."
+      }
+    ],
+    "narrationScript": "Cesta růstu vede přes čtyři fáze: od otestování zprávy přes získání reakce a aplikaci stoického rámce až po osvojení vnitřního klidu v reálném životě.",
+    "id": "10",
+    "audio": {
+      "zephyr": "audio/slide-10-zephyr.wav",
+      "puck": "audio/slide-10-puck.wav",
+      "kore": "audio/slide-10-kore.wav",
+      "aoede": "audio/slide-10-aoede.wav"
+    }
+  },
+  {
+    "category": "Stoická Moudrost",
+    "layout": "quote",
+    "quoteText": "Máš moc nad svou myslí, nikoliv nad vnějšími událostmi. Uvědom si to a najdeš sílu.",
+    "author": "Marcus Aurelius",
+    "narrationScript": "Jak připomínal Marcus Aurelius: Máš moc nad svou myslí, nikoliv nad vnějšími událostmi. Uvědom si to a najdeš sílu.",
+    "id": "11",
+    "audio": {
+      "zephyr": "audio/slide-11-zephyr.wav",
+      "puck": "audio/slide-11-puck.wav",
+      "kore": "audio/slide-11-kore.wav",
+      "aoede": "audio/slide-11-aoede.wav"
+    }
+  },
+  {
+    "category": "Závěr & Akce",
+    "layout": "outro",
+    "title": "Připraveni k tréninku?",
+    "subtitle": "Stoický Simulátor v Gemini AI Edition",
+    "contact": "Mentor v IT | Seznamkový & Komunitní Vyhledávač",
+    "narrationScript": "Jste připraveni začít trénovat? Stoický simulátor v edici Gemini AI je vám plně k dispozici.",
+    "id": "12",
+    "audio": {
+      "zephyr": "audio/slide-12-zephyr.wav",
+      "puck": "audio/slide-12-puck.wav",
+      "kore": "audio/slide-12-kore.wav",
+      "aoede": "audio/slide-12-aoede.wav"
     }
   }
 ]

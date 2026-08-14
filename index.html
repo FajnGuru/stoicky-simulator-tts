@@ -783,207 +783,82 @@
                 },
 
                 async playGeminiTTS(text, voiceName) {
-                    const apiKey = this.geminiApiKey || "";
-                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+    // Voláme naši Vercel Edge Function místo přímo Gemini
+    // API klíč zůstává bezpečně na serveru
 
-                    const promptText = `Say cheerfully and clearly in fluent Czech: ${text}`;
+    this.ttsLoading = true;
 
-                    const payload = {
-                        contents: [{
-                            parts: [{ text: promptText }]
-                        }],
-                        generationConfig: {
-                            responseModalities: ["AUDIO"],
-                            speechConfig: {
-                                voiceConfig: {
-                                    prebuiltVoiceConfig: { voiceName: voiceName }
-                                }
-                            }
-                        }
-                    };
+    try {
+        const res = await fetch('/api/tts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                text: text,
+                voiceName: voiceName || 'Zephyr'
+            })
+        });
 
-                    let res = null;
-                    let retries = 0;
-                    while (retries < 2) {
-                        try {
-                            res = await fetch(apiUrl, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify(payload)
-                            });
-                            if (res.ok) break;
-                            throw new Error("HTTP error " + res.status);
-                        } catch (e) {
-                            retries++;
-                            if (retries >= 2) throw e;
-                            await new Promise(r => setTimeout(r, 1000));
-                        }
-                    }
+        if (!res.ok) {
+            const errData = await res.json().catch(() => ({}));
+            throw new Error(errData.error || `TTS proxy error ${res.status}`);
+        }
 
-                    const data = await res.json();
-                    const part = data?.candidates?.[0]?.content?.parts?.[0];
-                    const base64Audio = part?.inlineData?.data;
-                    const mimeType = part?.inlineData?.mimeType || "audio/L16;rate=24000";
+        const data = await res.json();
+        const base64Audio = data.audio;
+        const mimeType = data.mimeType || 'audio/L16;rate=24000';
 
-                    if (!base64Audio) throw new Error("No audio data returned from Gemini TTS");
+        if (!base64Audio) {
+            throw new Error('No audio data returned from TTS proxy');
+        }
 
-                    let sampleRate = 24000;
-                    const match = mimeType.match(/rate=(\d+)/);
-                    if (match && match[1]) {
-                        sampleRate = parseInt(match[1], 10);
-                    }
+        // Zjistíme sample rate z mimeType
+        let sampleRate = 24000;
+        const match = mimeType.match(/rate=(\d+)/);
+        if (match && match[1]) {
+            sampleRate = parseInt(match[1], 10);
+        }
 
-                    const pcmData = this.base64ToArrayBuffer(base64Audio);
-                    const pcm16 = new Int16Array(pcmData);
-                    const wavBlob = this.pcmToWav(pcm16, sampleRate);
-                    const audioUrl = URL.createObjectURL(wavBlob);
+        // Převedeme base64 → PCM → WAV (stejná logika jako dříve)
+        const pcmData = this.base64ToArrayBuffer(base64Audio);
+        const pcm16 = new Int16Array(pcmData);
+        const wavBlob = this.pcmToWav(pcm16, sampleRate);
+        const audioUrl = URL.createObjectURL(wavBlob);
 
-                    this.audioCache[this.currentSlideIndex] = {
-                        url: audioUrl,
-                        blob: wavBlob,
-                        voice: voiceName,
-                        filename: `stoicky_simulator_slide_${this.currentSlideIndex + 1}_${voiceName.toLowerCase()}.wav`
-                    };
+        // Uložíme do cache
+        this.audioCache[this.currentSlideIndex] = {
+            url: audioUrl,
+            blob: wavBlob,
+            voice: voiceName,
+            filename: `stoicky_simulator_slide_${this.currentSlideIndex + 1}_${(voiceName || 'zephyr').toLowerCase()}.wav`
+        };
 
-                    const audio = new Audio(audioUrl);
-                    this.currentAudioSource = audio;
-                    this.isSpeaking = true;
+        // Přehráme
+        const audio = new Audio(audioUrl);
+        this.currentAudioSource = audio;
+        this.isSpeaking = true;
 
-                    audio.onended = () => {
-                        this.isSpeaking = false;
-                        this.currentAudioSource = null;
-                        if (this.autoplay && this.currentSlideIndex < this.slides.length - 1) {
-                            setTimeout(() => this.nextSlide(), 800);
-                        }
-                    };
+        audio.onended = () => {
+            this.isSpeaking = false;
+            this.currentAudioSource = null;
+            if (this.autoplay && this.currentSlideIndex < this.slides.length - 1) {
+                setTimeout(() => this.nextSlide(), 800);
+            }
+        };
 
-                    audio.onerror = () => {
-                        this.isSpeaking = false;
-                        this.currentAudioSource = null;
-                    };
+        audio.onerror = () => {
+            this.isSpeaking = false;
+            this.currentAudioSource = null;
+        };
 
-                    await audio.play();
-                },
+        await audio.play();
 
-                playCachedAudio(index) {
-                    const cached = this.audioCache[index];
-                    if (!cached || !cached.url) return;
-
-                    const audio = new Audio(cached.url);
-                    this.currentAudioSource = audio;
-                    this.isSpeaking = true;
-
-                    audio.onended = () => {
-                        this.isSpeaking = false;
-                        this.currentAudioSource = null;
-                        if (this.autoplay && this.currentSlideIndex < this.slides.length - 1) {
-                            setTimeout(() => this.nextSlide(), 800);
-                        }
-                    };
-
-                    audio.onerror = () => {
-                        this.isSpeaking = false;
-                        this.currentAudioSource = null;
-                    };
-
-                    audio.play();
-                },
-
-                playBrowserTTS(text) {
-                    if (!('speechSynthesis' in window)) {
-                        alert("Váš prohlížeč nepodporuje hlasové předčítání.");
-                        return;
-                    }
-
-                    window.speechSynthesis.cancel();
-                    const utterance = new SpeechSynthesisUtterance(text);
-                    utterance.lang = 'cs-CZ';
-                    utterance.rate = 1.0;
-
-                    utterance.onstart = () => {
-                        this.isSpeaking = true;
-                    };
-
-                    utterance.onend = () => {
-                        this.isSpeaking = false;
-                        if (this.autoplay && this.currentSlideIndex < this.slides.length - 1) {
-                            setTimeout(() => this.nextSlide(), 800);
-                        }
-                    };
-
-                    utterance.onerror = () => {
-                        this.isSpeaking = false;
-                    };
-
-                    window.speechSynthesis.speak(utterance);
-                },
-
-                stopAudio() {
-                    if (this.currentAudioSource) {
-                        try {
-                            this.currentAudioSource.pause();
-                            this.currentAudioSource = null;
-                        } catch(e) {}
-                    }
-                    if ('speechSynthesis' in window) {
-                        window.speechSynthesis.cancel();
-                    }
-                    this.isSpeaking = false;
-                    this.ttsLoading = false;
-                },
-
-                base64ToArrayBuffer(base64) {
-                    const binaryString = window.atob(base64);
-                    const len = binaryString.length;
-                    const bytes = new Uint8Array(len);
-                    for (let i = 0; i < len; i++) {
-                        bytes[i] = binaryString.charCodeAt(i);
-                    }
-                    return bytes.buffer;
-                },
-
-                pcmToWav(pcm16, sampleRate = 24000) {
-                    const numChannels = 1;
-                    const bytesPerSample = 2;
-                    const blockAlign = numChannels * bytesPerSample;
-                    const byteRate = sampleRate * blockAlign;
-                    const dataSize = pcm16.length * bytesPerSample;
-                    const buffer = new ArrayBuffer(44 + dataSize);
-                    const view = new DataView(buffer);
-
-                    // RIFF chunk descriptor
-                    this.writeString(view, 0, 'RIFF');
-                    view.setUint32(4, 36 + dataSize, true);
-                    this.writeString(view, 8, 'WAVE');
-
-                    // fmt sub-chunk
-                    this.writeString(view, 12, 'fmt ');
-                    view.setUint32(16, 16, true);
-                    view.setUint16(20, 1, true); // Linear PCM
-                    view.setUint16(22, numChannels, true);
-                    view.setUint32(24, sampleRate, true);
-                    view.setUint32(28, byteRate, true);
-                    view.setUint16(32, blockAlign, true);
-                    view.setUint16(34, 16, true); // Bits per sample
-
-                    // data sub-chunk
-                    this.writeString(view, 36, 'data');
-                    view.setUint32(40, dataSize, true);
-
-                    // Write PCM samples
-                    let offset = 44;
-                    for (let i = 0; i < pcm16.length; i++, offset += 2) {
-                        view.setInt16(offset, pcm16[i], true);
-                    }
-
-                    return new Blob([buffer], { type: 'audio/wav' });
-                },
-
-                writeString(view, offset, string) {
-                    for (let i = 0; i < string.length; i++) {
-                        view.setUint8(offset + i, string.charCodeAt(i));
-                    }
-                },
+    } catch (err) {
+        console.warn('TTS proxy failed, falling back to Browser SpeechSynthesis:', err);
+        this.playBrowserTTS(text);
+    } finally {
+        this.ttsLoading = false;
+    }
+},
 
                 geminiApiKey: localStorage.getItem('gemini_tts_api_key') || '',
 

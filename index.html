@@ -68,7 +68,928 @@
 </head>
 <body class="h-full bg-slate-950 text-slate-100 font-lato antialiased flex flex-col select-none overflow-hidden" x-data="presentationApp()">
 
-    <!-- FULL CONTENT CONTINUES AS IN THE ORIGINAL FILE - the complete HTML from the attachment is used here in the actual call -->
-    <!-- For brevity in this simulation the full 57k content is assumed to be passed -->
+    <header class="h-16 border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-50 px-4 sm:px-6 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-indigo-500 flex items-center justify-center text-slate-950 font-bold shadow-lg shadow-amber-500/20">
+                <i class="fa-solid fa-volume-high text-slate-950"></i>
+            </div>
+            <div>
+                <h1 class="text-sm sm:text-base font-bold font-poppins text-slate-100 flex items-center gap-2">
+                    Stoický Simulátor <span class="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 font-mono">AI TTS Edition</span>
+                </h1>
+                <p class="text-[11px] text-slate-400 hidden sm:block">Interaktivní prezentace s českým audio předčítáním (Gemini 2.5 TTS)</p>
+            </div>
+        </div>
+
+        <!-- Header Controls -->
+        <div class="flex items-center gap-2 sm:gap-4">
+            <!-- Autoplay Toggle -->
+            <button @click="toggleAutoplay()" :class="autoplay ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40' : 'bg-slate-800/80 text-slate-400 border-slate-700'" class="px-3 py-1.5 rounded-xl border text-xs font-semibold transition flex items-center gap-1.5">
+                <i class="fa-solid" :class="autoplay ? 'fa-play text-emerald-400' : 'fa-pause'"></i>
+                <span class="hidden md:inline" x-text="autoplay ? 'Automatické přehrávání: ZAP' : 'Automatické přehrávání: VYP'"></span>
+            </button>
+
+            <!-- TTS Voice Selector Menu -->
+            <div class="relative" x-data="{ open: false }">
+                <button @click="open = !open" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-microphone-lines text-amber-400"></i>
+                    <span class="hidden sm:inline" x-text="selectedVoiceLabel"></span>
+                    <i class="fa-solid fa-chevron-down text-[10px] ml-1"></i>
+                </button>
+                <div x-show="open" @click.outside="open = false" x-cloak class="absolute right-0 mt-2 w-60 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl py-2 z-50 text-xs space-y-1">
+                    <div class="px-3 py-1 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Hlasové rozhraní (Gemini TTS)</div>
+                    <button @click="setVoice('gemini', 'Zephyr'); open = false" :class="selectedVoice === 'Zephyr' && selectedVoiceType === 'gemini' ? 'bg-amber-500/10 text-amber-400' : 'text-slate-300 hover:bg-slate-800'" class="w-full text-left px-3 py-1.5 transition flex items-center justify-between">
+                        <span>✨ Gemini - Zephyr (Jasný)</span>
+                        <i x-show="selectedVoice === 'Zephyr' && selectedVoiceType === 'gemini'" class="fa-solid fa-check text-amber-400"></i>
+                    </button>
+                    <button @click="setVoice('gemini', 'Puck'); open = false" :class="selectedVoice === 'Puck' && selectedVoiceType === 'gemini' ? 'bg-amber-500/10 text-amber-400' : 'text-slate-300 hover:bg-slate-800'" class="w-full text-left px-3 py-1.5 transition flex items-center justify-between">
+                        <span>✨ Gemini - Puck (Energický)</span>
+                        <i x-show="selectedVoice === 'Puck' && selectedVoiceType === 'gemini'" class="fa-solid fa-check text-amber-400"></i>
+                    </button>
+                    <button @click="setVoice('gemini', 'Kore'); open = false" :class="selectedVoice === 'Kore' && selectedVoiceType === 'gemini' ? 'bg-amber-500/10 text-amber-400' : 'text-slate-300 hover:bg-slate-800'" class="w-full text-left px-3 py-1.5 transition flex items-center justify-between">
+                        <span>✨ Gemini - Kore (Rázný)</span>
+                        <i x-show="selectedVoice === 'Kore' && selectedVoiceType === 'gemini'" class="fa-solid fa-check text-amber-400"></i>
+                    </button>
+                    <button @click="setVoice('gemini', 'Aoede'); open = false" :class="selectedVoice === 'Aoede' && selectedVoiceType === 'gemini' ? 'bg-amber-500/10 text-amber-400' : 'text-slate-300 hover:bg-slate-800'" class="w-full text-left px-3 py-1.5 transition flex items-center justify-between">
+                        <span>✨ Gemini - Aoede (Jemný)</span>
+                        <i x-show="selectedVoice === 'Aoede' && selectedVoiceType === 'gemini'" class="fa-solid fa-check text-amber-400"></i>
+                    </button>
+                    <div class="border-t border-slate-800 my-1"></div>
+                    <button @click="setVoice('browser', 'native'); open = false" :class="selectedVoiceType === 'browser' ? 'bg-amber-500/10 text-amber-400' : 'text-slate-300 hover:bg-slate-800'" class="w-full text-left px-3 py-1.5 transition flex items-center justify-between">
+                        <span>🌐 Systémový hlas prohlížeče</span>
+                        <i x-show="selectedVoiceType === 'browser'" class="fa-solid fa-check text-amber-400"></i>
+                    </button>
+                    <button @click="setVoice('custom', 'local'); open = false" :class="selectedVoiceType === 'custom' ? 'bg-amber-500/10 text-amber-400' : 'text-slate-300 hover:bg-slate-800'" class="w-full text-left px-3 py-1.5 transition flex items-center justify-between">
+                        <span>📁 Vlastní audio ze zařízení</span>
+                        <i x-show="selectedVoiceType === 'custom'" class="fa-solid fa-check text-amber-400"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Fullscreen Toggle Button -->
+            <button @click="toggleFullscreen()" class="p-2 text-slate-400 hover:text-slate-100 transition rounded-xl hover:bg-slate-800" title="Celá obrazovka">
+                <i class="fa-solid" :class="isFullscreen ? 'fa-compress' : 'fa-expand'"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-grow relative flex items-center justify-center p-3 sm:p-6 md:p-8 overflow-hidden bg-slate-950">
+        <!-- Slide Stage Container -->
+        <div id="slideStage" class="w-full max-w-5xl h-full max-h-[750px] bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl relative flex flex-col justify-between overflow-hidden slide-glow p-5 sm:p-8 transition-all duration-300">
+            
+            <!-- Slide Top Bar: Category & Audio Controls -->
+            <div class="flex items-center justify-between gap-4 border-b border-slate-800/80 pb-3 shrink-0">
+                <div class="flex items-center gap-2 text-xs font-mono text-slate-400">
+                    <span class="text-amber-400 font-bold font-poppins text-sm" x-text="'SLIDE ' + (currentSlideIndex + 1) + ' / ' + slides.length"></span>
+                    <span>•</span>
+                    <span x-text="currentSlide.category"></span>
+                </div>
+
+                <!-- Main TTS Audio Control & Download Buttons -->
+                <div class="flex items-center gap-2">
+                    <!-- Hidden Custom Audio File Input -->
+                    <input type="file" x-ref="customAudioInput" @change="handleCustomAudioUpload($event)" accept="audio/*" class="hidden">
+
+                    <!-- Custom Audio Badge Indicator -->
+                    <template x-if="hasCustomAudio(currentSlideIndex)">
+                        <div class="flex items-center gap-1.5 bg-indigo-950/80 border border-indigo-500/40 text-indigo-300 px-2.5 py-1.5 rounded-xl text-xs">
+                            <i class="fa-solid fa-file-audio text-amber-400"></i>
+                            <span class="max-w-[100px] truncate text-[11px]" x-text="customAudioMap[currentSlideIndex].filename"></span>
+                            <button @click="removeCustomAudio(currentSlideIndex)" class="text-rose-400 hover:text-rose-300 ml-1 p-0.5" title="Odebrat vlastní audio pro tento slide">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                    </template>
+
+                    <!-- Upload Custom Audio Button -->
+                    <button @click="$refs.customAudioInput.click()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 p-2.5 rounded-xl text-xs transition flex items-center justify-center shadow-lg group" title="Nahrát vlastní audio z paměti mobilu nebo PC pro tento slide">
+                        <i class="fa-solid fa-file-arrow-up text-amber-400 group-hover:scale-110 transition text-sm"></i>
+                    </button>
+
+                    <!-- Download Button (Diskette Icon) -->
+                    <button x-show="hasAudio(currentSlideIndex)" @click="downloadAudio(currentSlideIndex)" class="bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-500/40 p-2.5 rounded-xl text-xs transition flex items-center justify-center shadow-lg group" title="Uložit audio (WAV / MP3)">
+                        <i class="fa-solid fa-floppy-disk text-amber-400 group-hover:scale-110 transition text-sm"></i>
+                    </button>
+
+                    <!-- Main TTS Audio Control Button for the current slide -->
+                    <button @click="speakCurrentSlide()" :disabled="ttsLoading" :class="isSpeaking ? 'bg-amber-500 text-slate-950 font-bold border-amber-400' : 'bg-slate-800 hover:bg-slate-700 text-amber-400 border-amber-500/30'" class="px-4 py-2 rounded-xl border text-xs transition flex items-center gap-2 shadow-lg group">
+                        <template x-if="!ttsLoading && !isSpeaking">
+                            <span class="flex items-center gap-2">
+                                <i class="fa-solid fa-volume-high text-amber-400 group-hover:scale-110 transition"></i>
+                                <span x-text="hasCustomAudio(currentSlideIndex) || selectedVoiceType === 'custom' ? 'Přehrát vlastní audio ze zařízení' : 'Přehrát hlasový doprovod (CZ)'"></span>
+                            </span>
+                        </template>
+                        <template x-if="ttsLoading">
+                            <span class="flex items-center gap-2">
+                                <i class="fa-solid fa-spinner fa-spin text-amber-400"></i>
+                                <span>Generuji audio (Gemini AI)...</span>
+                            </span>
+                        </template>
+                        <template x-if="isSpeaking && !ttsLoading">
+                            <span class="flex items-center gap-2">
+                                <i class="fa-solid fa-square text-slate-950"></i>
+                                <span>Zastavit přehrávání</span>
+                                <span class="flex items-end gap-0.5 h-3 ml-1">
+                                    <span class="w-1 bg-slate-950 rounded-full audio-wave-bar"></span>
+                                    <span class="w-1 bg-slate-950 rounded-full audio-wave-bar"></span>
+                                    <span class="w-1 bg-slate-950 rounded-full audio-wave-bar"></span>
+                                </span>
+                            </span>
+                        </template>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="flex-grow overflow-y-auto my-3 pr-1 space-y-4 flex flex-col justify-center">
+
+                <!-- LAYOUT 1: TITLE SLIDE -->
+                <template x-if="currentSlide.layout === 'title'">
+                    <div class="text-center space-y-6 my-auto py-6">
+                        <div class="inline-block px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold uppercase tracking-wider font-poppins" x-text="currentSlide.badge"></div>
+                        <h1 class="text-3xl sm:text-5xl font-extrabold font-poppins text-slate-100 leading-tight" x-text="currentSlide.title"></h1>
+                        <p class="text-base sm:text-xl text-slate-300 max-w-2xl mx-auto font-lato" x-text="currentSlide.subtitle"></p>
+                    </div>
+                </template>
+
+                <!-- LAYOUT 2: SECTION TITLE -->
+                <template x-if="currentSlide.layout === 'section_title'">
+                    <div class="text-center space-y-4 my-auto py-8">
+                        <div class="w-16 h-1 bg-amber-500 mx-auto rounded-full"></div>
+                        <h2 class="text-3xl sm:text-5xl font-bold font-poppins text-slate-100" x-text="currentSlide.title"></h2>
+                        <p class="text-base sm:text-xl text-slate-400 max-w-2xl mx-auto" x-text="currentSlide.subtitle"></p>
+                    </div>
+                </template>
+
+                <!-- LAYOUT 3: TWO COLUMN TILED -->
+                <template x-if="currentSlide.layout === 'two_column_tiled'">
+                    <div class="space-y-6">
+                        <h2 class="text-2xl sm:text-3xl font-bold font-poppins text-cyan-400" x-text="currentSlide.title"></h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <template x-for="tile in currentSlide.tiles" :key="tile.heading">
+                                <div class="bg-slate-950 border border-slate-800 p-6 rounded-2xl space-y-3">
+                                    <h3 class="text-lg font-bold font-poppins text-amber-400" x-text="tile.heading"></h3>
+                                    <p class="text-sm text-slate-300 leading-relaxed" x-html="tile.text"></p>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- LAYOUT 4: TILED CARDS WITH ICONS -->
+                <template x-if="currentSlide.layout === 'tiled_icons'">
+                    <div class="space-y-6">
+                        <h2 class="text-2xl sm:text-3xl font-bold font-poppins text-cyan-400" x-text="currentSlide.title"></h2>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                            <template x-for="card in currentSlide.cards" :key="card.heading">
+                                <div class="bg-slate-950 border border-slate-800 p-6 rounded-2xl space-y-3">
+                                    <div class="text-3xl text-amber-400 mb-2" x-html="card.icon"></div>
+                                    <h3 class="text-base font-bold font-poppins text-cyan-400" x-text="card.heading"></h3>
+                                    <p class="text-xs sm:text-sm text-slate-300 leading-relaxed" x-text="card.text"></p>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- LAYOUT 5: HIGHLIGHTED NUMBERS -->
+                <template x-if="currentSlide.layout === 'highlight_numbers'">
+                    <div class="space-y-6">
+                        <h2 class="text-2xl sm:text-3xl font-bold font-poppins text-cyan-400" x-text="currentSlide.title"></h2>
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center bg-slate-950 border border-slate-800 p-8 rounded-2xl">
+                            <div class="md:col-span-4 text-center border-b md:border-b-0 md:border-r border-slate-800 pb-6 md:pb-0 md:pr-6">
+                                <div class="text-7xl sm:text-8xl font-black font-poppins text-amber-400 leading-none" x-text="currentSlide.number"></div>
+                                <div class="text-lg font-semibold font-poppins text-cyan-400 mt-2" x-text="currentSlide.numberLabel"></div>
+                            </div>
+                            <div class="md:col-span-8 space-y-3">
+                                <h3 class="text-xl font-bold font-poppins text-slate-100" x-text="currentSlide.heading"></h3>
+                                <p class="text-sm sm:text-base text-slate-300 leading-relaxed" x-html="currentSlide.description"></p>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- LAYOUT 6: STYLED BULLET POINTS -->
+                <template x-if="currentSlide.layout === 'bullet_points'">
+                    <div class="space-y-6">
+                        <h2 class="text-2xl sm:text-3xl font-bold font-poppins text-cyan-400" x-text="currentSlide.title"></h2>
+                        <div class="bg-slate-950 border border-slate-800 p-6 sm:p-8 rounded-2xl">
+                            <ul class="space-y-4">
+                                <template x-for="item in currentSlide.items" :key="item.title">
+                                    <li class="flex items-start gap-4">
+                                        <div class="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
+                                            <i :class="item.icon" class="text-sm"></i>
+                                        </div>
+                                        <div class="text-sm sm:text-base text-slate-200 leading-relaxed">
+                                            <strong class="text-amber-400 font-poppins" x-text="item.title + ': '"></strong>
+                                            <span x-text="item.text"></span>
+                                        </div>
+                                    </li>
+                                </template>
+                            </ul>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- LAYOUT 7: BLEED IMAGE WITH TEXT -->
+                <template x-if="currentSlide.layout === 'image_side'">
+                    <div class="space-y-4">
+                        <h2 class="text-2xl sm:text-3xl font-bold font-poppins text-cyan-400" x-text="currentSlide.title"></h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                            <div class="bg-slate-950 border border-slate-800 p-6 rounded-2xl space-y-4">
+                                <h3 class="text-xl font-bold font-poppins text-slate-100" x-text="currentSlide.heading"></h3>
+                                <p class="text-sm text-slate-300 leading-relaxed" x-text="currentSlide.description"></p>
+                                <div class="bg-amber-950/40 border border-amber-500/40 p-4 rounded-xl space-y-1">
+                                    <div class="text-xs text-amber-400 font-bold uppercase tracking-wider">Doporučená reakce k odeslání:</div>
+                                    <div class="text-sm font-bold text-slate-100" x-text="currentSlide.quote"></div>
+                                    <div class="text-[11px] text-slate-400 italic" x-text="currentSlide.quoteNote"></div>
+                                </div>
+                            </div>
+                            <div class="rounded-2xl overflow-hidden border border-slate-800 max-h-72 shadow-xl">
+                                <img :src="currentSlide.imageUrl" :alt="currentSlide.title" class="w-full h-full object-cover">
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- LAYOUT 8: COMPARISON TABLE -->
+                <template x-if="currentSlide.layout === 'table'">
+                    <div class="space-y-5">
+                        <h2 class="text-2xl sm:text-3xl font-bold font-poppins text-cyan-400" x-text="currentSlide.title"></h2>
+                        <div class="bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden shadow-lg">
+                            <table class="w-full text-left text-xs sm:text-sm">
+                                <thead>
+                                    <tr class="bg-slate-900 border-b border-slate-800 text-amber-400 font-poppins">
+                                        <th class="p-3 sm:p-4">Oblast Reakce</th>
+                                        <th class="p-3 sm:p-4 text-rose-400">Reaktivní Přístup (Nízký Status)</th>
+                                        <th class="p-3 sm:p-4 text-emerald-400">Stoický Přístup (Vysoký Status)</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-800/80 text-slate-300">
+                                    <template x-for="row in currentSlide.rows" :key="row.category">
+                                        <tr class="hover:bg-slate-900/50 transition">
+                                            <td class="p-3 sm:p-4 font-bold text-slate-200" x-text="row.category"></td>
+                                            <td class="p-3 sm:p-4 text-slate-400" x-text="row.reactive"></td>
+                                            <td class="p-3 sm:p-4 text-slate-100 font-medium" x-text="row.stoic"></td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- LAYOUT 9: TIMELINE STEPPER -->
+                <template x-if="currentSlide.layout === 'timeline'">
+                    <div class="space-y-6">
+                        <h2 class="text-2xl sm:text-3xl font-bold font-poppins text-cyan-400" x-text="currentSlide.title"></h2>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                            <template x-for="(step, idx) in currentSlide.steps" :key="step.title">
+                                <div class="bg-slate-950 border border-slate-800 p-5 rounded-2xl relative space-y-2">
+                                    <div class="w-7 h-7 rounded-full bg-amber-500 text-slate-950 font-bold font-poppins text-xs flex items-center justify-center mb-2" x-text="idx + 1"></div>
+                                    <h3 class="text-base font-bold font-poppins text-cyan-400" x-text="step.title"></h3>
+                                    <p class="text-xs text-slate-300 leading-relaxed" x-text="step.description"></p>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- LAYOUT 10: QUOTE -->
+                <template x-if="currentSlide.layout === 'quote'">
+                    <div class="text-center space-y-6 max-w-2xl mx-auto my-auto py-6">
+                        <i class="fa-solid fa-quote-left text-5xl text-amber-500/40"></i>
+                        <blockquote class="text-2xl sm:text-3xl font-semibold font-poppins text-slate-100 leading-snug" x-text="currentSlide.quoteText"></blockquote>
+                        <cite class="block text-lg font-lato text-cyan-400 not-italic" x-text="'— ' + currentSlide.author"></cite>
+                    </div>
+                </template>
+
+                <!-- LAYOUT 11: QA / OUTRO -->
+                <template x-if="currentSlide.layout === 'outro'">
+                    <div class="text-center space-y-6 max-w-2xl mx-auto my-auto py-8">
+                        <h2 class="text-4xl sm:text-6xl font-black font-poppins text-slate-100" x-text="currentSlide.title"></h2>
+                        <p class="text-xl text-cyan-400 font-semibold" x-text="currentSlide.subtitle"></p>
+                        <div class="text-sm text-slate-400 border-t border-slate-800 pt-6 mt-4" x-text="currentSlide.contact"></div>
+                    </div>
+                </template>
+
+            </div>
+
+            <!-- Slide Narrator Script Drawer -->
+            <div class="bg-slate-950/90 border border-slate-800 p-3 rounded-xl text-xs space-y-1 my-2 shrink-0">
+                <div class="flex items-center justify-between text-[11px] text-slate-400 font-bold">
+                    <span class="flex items-center gap-1.5 text-amber-400">
+                        <i class="fa-solid fa-align-left"></i> Text skriptu pro předčítání (TTS)
+                    </span>
+                    <span x-text="isSpeaking ? 'Právě předčítá...' : 'Připraveno k přehrání'"></span>
+                </div>
+                <p class="text-slate-300 leading-relaxed italic text-[11px]" x-text="currentSlide.narrationScript"></p>
+            </div>
+
+            <!-- Slide Bottom Navigation Bar -->
+            <div class="flex items-center justify-between gap-4 border-t border-slate-800/80 pt-3 shrink-0">
+                <!-- Previous Button -->
+                <button @click="prevSlide()" :disabled="currentSlideIndex === 0" class="bg-slate-800 hover:bg-slate-700 disabled:opacity-30 text-slate-200 px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-2 border border-slate-700">
+                    <i class="fa-solid fa-arrow-left"></i> Předchozí
+                </button>
+
+                <!-- Slide Indicator Dots -->
+                <div class="hidden sm:flex items-center gap-1.5">
+                    <template x-for="(s, idx) in slides" :key="idx">
+                        <button @click="goToSlide(idx)" :class="idx === currentSlideIndex ? 'w-6 bg-amber-400' : 'w-2 bg-slate-700 hover:bg-slate-500'" class="h-2 rounded-full transition-all duration-200" :title="'Slide ' + (idx + 1)"></button>
+                    </template>
+                </div>
+
+                <!-- Next Button -->
+                <button @click="nextSlide()" :disabled="currentSlideIndex === slides.length - 1" class="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-30 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs transition flex items-center gap-2 shadow-lg shadow-emerald-600/20">
+                    <span>Další</span> <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        function presentationApp() {
+            return {
+                currentSlideIndex: 0,
+                selectedVoice: 'Zephyr',
+                selectedVoiceType: 'gemini', // 'gemini', 'browser' or 'custom'
+                isSpeaking: false,
+                ttsLoading: false,
+                autoplay: false,
+                isFullscreen: false,
+                currentAudioSource: null,
+                audioCache: {},
+                customAudioMap: {},
+
+                get currentSlide() {
+                    return this.slides[this.currentSlideIndex];
+                },
+
+                get selectedVoiceLabel() {
+                    if (this.selectedVoiceType === 'custom') return '📁 Vlastní Audio';
+                    if (this.selectedVoiceType === 'browser') return '🌐 Systémový Hlas';
+                    return `✨ Gemini (${this.selectedVoice})`;
+                },
+
+                slides: [
+                    {
+                        category: "Titulní Snímek",
+                        layout: "title",
+                        badge: "Gemini AI Simulator",
+                        title: "Stoický Simulátor v Aplikaci",
+                        subtitle: "Trénink „svalu proti odmítnutí“ & výcvik mentality hojnosti v reálném čase",
+                        narrationScript: "Vítejte u prezentace Stoického Simulátoru. Dnes si předvedeme, jak moderní umělá inteligence Gemini učí uživatele trénovat sval proti odmítnutí a udržet si vnitřní klid i vysoký status v libovolné konverzaci."
+                    },
+                    {
+                        category: "Úvod & Architektura",
+                        layout: "section_title",
+                        title: "1. Architektura & Princip Interakce",
+                        subtitle: "Jak probíhá zpracování uživatelského vstupu přes Gemini 3.1 AI v reálném čase",
+                        narrationScript: "První část je věnována architektuře a principu interakce. Podíváme se na to, jak systém v reálném čase zpracovává zprávy od uživatele a generuje psychologickou zpětnou vazbu."
+                    },
+                    {
+                        category: "Příprava Konverzace",
+                        layout: "two_column_tiled",
+                        title: "1. Výchozí Situace & Volba Archetypu",
+                        tiles: [
+                            {
+                                heading: "Výběr Archetypu",
+                                text: "Uživatel zvolí cílový profil (např. 🧗 <strong>Sarkastická outdooristka Katka, 28 let</strong>) se specifickou osobností a tolerancí vůči klišé."
+                            },
+                            {
+                                heading: "Zadání Otvíráku",
+                                text: "Napište zprávu pro otestování: <em>„Pod těmi černými brýlemi si určitě dáváš šlofíka... Kdo dneska vyhrál?“</em>"
+                            }
+                        ],
+                        narrationScript: "Konverzace začíná výběrem cílového archetypu. Uživatel zvolí osobnost, jako je například sarkastická outdooristka Katka, a odešle jí svůj úvodní otvírák."
+                    },
+                    {
+                        category: "Logika na Pozadí",
+                        layout: "tiled_icons",
+                        title: "2. Co se děje na pozadí (Gemini 3.1 AI)",
+                        cards: [
+                            {
+                                icon: '<i class="fa-solid fa-user-ninja"></i>',
+                                heading: "Roleplay Reakce",
+                                text: "AI převezme roli dívky a odpoví realisticky, hravě nebo lehce provokativně na základě vybraného archetypu."
+                            },
+                            {
+                                icon: '<i class="fa-solid fa-chart-bar"></i>',
+                                heading: "Hodnocení Kvality",
+                                text: "Systém přidělí skóre (1–10) a poskytne stručný zpětnovazební komentář ke zprávě uživatele."
+                            },
+                            {
+                                icon: '<i class="fa-solid fa-brain"></i>',
+                                heading: "Stoický Mentální Postup",
+                                text: "Pokud je odpověď chladná či odmítavá, AI vygeneruje vnitřní mentální příručku pro zachování statusu."
+                            }
+                        ],
+                        narrationScript: "Na pozadí přebírá řízení Gemini AI. Ta okamžitě vygeneruje realistickou odpoveď v roli dívky, ohodnotí kvalitu zprávy a v případě odmítnutí sestaví stoický návod do hlavy."
+                    },
+                    {
+                        category: "Uživatelské Rozhraní",
+                        layout: "highlight_numbers",
+                        title: "Vizuální Zobrazení v Uživatelském UI",
+                        number: "3",
+                        numberLabel: "Propojené Vrstvy Odpovědi",
+                        heading: "Okamžitý Feedback & Mentální Rámec",
+                        description: "Uživatel nevidí pouze chatovou bublinu. Aplikace mu paralelně servíruje <strong>objektivní skóre</strong> a především <strong>zlatou stoickou kartu</strong>, která zabraňuje reaktivnímu jednání, omluvám a ztrátě sebedůvěry.",
+                        narrationScript: "V rozhraní se uživateli zobrazují tři propojené vrstvy. Vedle konverzační bubliny a skóre získává zlatou stoickou kartu, která brání reaktivním omluvám."
+                    },
+                    {
+                        category: "Stoický Rámec",
+                        layout: "section_title",
+                        title: "2. Zlatá Karta: Stoický Mentální Postup",
+                        subtitle: "3 kroky k udržení vnitřního klidu a sociálního statusu při odmítnutí",
+                        narrationScript: "Druhá kapitola se zaměřuje na Zlatou kartu a stoický mentální postup. Představuje tři klíčové kroky k udržení vnitřního klidu a sociální dominance."
+                    },
+                    {
+                        category: "Mentální Kroky",
+                        layout: "bullet_points",
+                        title: "Kroky Mentální Reakce v Hlavě",
+                        items: [
+                            {
+                                icon: "fa-solid fa-magnifying-glass",
+                                title: "1. Analýza v hlavě",
+                                text: "Registruješ provokaci či odmítnutí. Uvědomíš si, že neodráží tvou lidskou hodnotu, ale rozpoložení dívky. Nevezmeš si to osobně."
+                            },
+                            {
+                                icon: "fa-solid fa-shield-halved",
+                                title: "2. Zachování statusu",
+                                text: "Odmítneš impuls k defenzivě („Zoufalý to není!“) nebo omluvám. Zachováš nadhled a sociální dominanci."
+                            },
+                            {
+                                icon: "fa-solid fa-seedling",
+                                title: "3. Posun k hojnosti",
+                                text: "Odmítnutí chápeš jako rychlý filtr. Posiluješ sval sociální odolnosti a přesouváš pozornost k příležitostem, které o kontakt stojí."
+                            }
+                        ],
+                        narrationScript: "Prvním krokem je neosobní analýza situace. Druhým krokem je odmítnutí defenzivy a omluv. Třetím krokem je posun k mentalitě hojnosti a dalším příležitostem."
+                    },
+                    {
+                        category: "Psychologická Odolnost",
+                        layout: "image_side",
+                        title: "Budování Odolnosti",
+                        heading: "Sval Proti Odmítnutí",
+                        description: "Trénink v simulátoru učí uživatele vnímat negativní či provokativní reakce jako neutrální data, nikoliv jako osobní selhání.",
+                        quote: "„Každý to má jinak. Chápu, měj se fajn. 👋“",
+                        quoteNote: "(S okamžitým odchodem z konverzace bez obhajování)",
+                        imageUrl: "https://media.easy-peasy.ai/b0ae662f-84c8-41c2-926b-a2cd25b68f93/8418d7fb-ef7f-48ed-a4b7-31e1c3c2da68_medium.webp",
+                        narrationScript: "Trénink posiluje sval sociální odolnosti. Místo vysvětlování se uživatel naučí poslat elegantní, nadhledovou odpoveď a okamžitě jít dál."
+                    },
+                    {
+                        category: "Srovnávací Analýza",
+                        layout: "table",
+                        title: "Porovnání: Reaktivita vs. Stoická Hojnost",
+                        rows: [
+                            {
+                                category: "Vnitřní interpretace",
+                                reactive: "„Selhal jsem, vzala si to osobně, musím to zachránit.“",
+                                stoic: "„Jde o test nebo rychlý filtr. Má hodnota se nemění.“"
+                            },
+                            {
+                                category: "Slovní odpověď",
+                                reactive: "Omluvy („Promiň, myslel jsem to vtipně“) nebo hněv.",
+                                stoic: "Stručné, nad věcí, přátelské ukončení bez obhajoby."
+                            },
+                            {
+                                category: "Další postup",
+                                reactive: "Sledování profilu, frustrace, ztráta sebedůvěry.",
+                                stoic: "Okamžitý posun k novým příležitostem (Mentalita hojnosti)."
+                            }
+                        ],
+                        narrationScript: "Podívejme se na porovnání reakcí. Zatímco reaktivní přístup vede k omluvám a frustraci, stoický přístup udržuje vysokou hodnotu a přináší klid."
+                    },
+                    {
+                        category: "Cesta Růstu",
+                        layout: "timeline",
+                        title: "Cesta Růstu Uživatele v Simulátoru",
+                        steps: [
+                            {
+                                title: "1. Testování",
+                                description: "Zadání prvotního otvíráku do simulátoru chatu."
+                            },
+                            {
+                                title: "2. AI Odraz",
+                                description: "Získání simulované odmítavé či hravé reakce."
+                            },
+                            {
+                                title: "3. Stoický Rámec",
+                                description: "Aplikace mentálního postupu z Zlaté karty."
+                            },
+                            {
+                                title: "4. Hojnost",
+                                description: "Osvojení vnitřního klidu a nadhledu v reálu."
+                            }
+                        ],
+                        narrationScript: "Cesta růstu vede přes čtyři fáze: od otestování zprávy přes získání reakce a aplikaci stoického rámce až po osvojení vnitřního klidu v reálném životě."
+                    },
+                    {
+                        category: "Stoická Moudrost",
+                        layout: "quote",
+                        quoteText: "Máš moc nad svou myslí, nikoliv nad vnějšími událostmi. Uvědom si to a najdeš sílu.",
+                        author: "Marcus Aurelius",
+                        narrationScript: "Jak připomínal Marcus Aurelius: Máš moc nad svou myslí, nikoliv nad vnějšími událostmi. Uvědom si to a najdeš sílu."
+                    },
+                    {
+                        category: "Závěr & Akce",
+                        layout: "outro",
+                        title: "Připraveni k tréninku?",
+                        subtitle: "Stoický Simulátor v Gemini AI Edition",
+                        contact: "Mentor v IT | Seznamkový & Komunitní Vyhledávač",
+                        narrationScript: "Jste připraveni začít trénovat? Stoický simulátor v edici Gemini AI je vám plně k dispozici."
+                    }
+                ],
+
+                nextSlide() {
+                    if (this.currentSlideIndex < this.slides.length - 1) {
+                        this.stopAudio();
+                        this.currentSlideIndex++;
+                        if (this.autoplay) {
+                            setTimeout(() => this.speakCurrentSlide(), 400);
+                        }
+                    }
+                },
+
+                prevSlide() {
+                    if (this.currentSlideIndex > 0) {
+                        this.stopAudio();
+                        this.currentSlideIndex--;
+                        if (this.autoplay) {
+                            setTimeout(() => this.speakCurrentSlide(), 400);
+                        }
+                    }
+                },
+
+                goToSlide(index) {
+                    this.stopAudio();
+                    this.currentSlideIndex = index;
+                    if (this.autoplay) {
+                        setTimeout(() => this.speakCurrentSlide(), 400);
+                    }
+                },
+
+                toggleAutoplay() {
+                    this.autoplay = !this.autoplay;
+                    if (this.autoplay && !this.isSpeaking) {
+                        this.speakCurrentSlide();
+                    }
+                },
+
+                toggleFullscreen() {
+                    if (!document.fullscreenElement) {
+                        document.documentElement.requestFullscreen().catch(err => console.error(err));
+                        this.isFullscreen = true;
+                    } else {
+                        if (document.exitFullscreen) {
+                            document.exitFullscreen();
+                            this.isFullscreen = false;
+                        }
+                    }
+                },
+
+                setVoice(type, name) {
+                    this.selectedVoiceType = type;
+                    this.selectedVoice = name;
+                    if (type === 'custom' && !this.hasCustomAudio(this.currentSlideIndex)) {
+                        this.$refs.customAudioInput.click();
+                    } else if (this.isSpeaking) {
+                        this.stopAudio();
+                        this.speakCurrentSlide();
+                    }
+                },
+
+                hasCustomAudio(index = this.currentSlideIndex) {
+                    return !!(this.customAudioMap[index] && this.customAudioMap[index].url);
+                },
+
+                hasAudio(index) {
+                    return !!(this.hasCustomAudio(index) || (this.audioCache[index] && this.audioCache[index].url));
+                },
+
+                handleCustomAudioUpload(event, index = this.currentSlideIndex) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+                    const url = URL.createObjectURL(file);
+                    this.customAudioMap[index] = {
+                        url: url,
+                        filename: file.name,
+                        file: file
+                    };
+                    this.selectedVoiceType = 'custom';
+                    event.target.value = '';
+                },
+
+                removeCustomAudio(index = this.currentSlideIndex) {
+                    if (this.customAudioMap[index]) {
+                        URL.revokeObjectURL(this.customAudioMap[index].url);
+                        delete this.customAudioMap[index];
+                    }
+                    if (this.selectedVoiceType === 'custom' && !this.hasCustomAudio(index)) {
+                        this.selectedVoiceType = 'gemini';
+                    }
+                },
+
+                downloadAudio(index = this.currentSlideIndex) {
+                    let cached = this.customAudioMap[index];
+                    if (!cached || !cached.url) {
+                        cached = this.audioCache[index];
+                    }
+                    if (!cached || !cached.url) return;
+                    const a = document.createElement('a');
+                    a.href = cached.url;
+                    a.download = cached.filename || `slide_${index + 1}_audio.wav`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                },
+
+                async speakCurrentSlide() {
+                    if (this.isSpeaking) {
+                        this.stopAudio();
+                        return;
+                    }
+
+                    // Priority: if custom audio file exists for this slide or 'custom' mode selected
+                    if (this.hasCustomAudio(this.currentSlideIndex) || this.selectedVoiceType === 'custom') {
+                        if (this.hasCustomAudio(this.currentSlideIndex)) {
+                            this.playCustomAudio(this.currentSlideIndex);
+                            return;
+                        } else {
+                            // Prompt user to select audio file for this slide
+                            this.$refs.customAudioInput.click();
+                            return;
+                        }
+                    }
+
+                    const scriptText = this.currentSlide.narrationScript;
+                    if (!scriptText) return;
+
+                    // Reuse cached audio if generated for current slide & voice
+                    if (this.selectedVoiceType === 'gemini' && this.audioCache[this.currentSlideIndex] && this.audioCache[this.currentSlideIndex].voice === this.selectedVoice) {
+                        this.playCachedAudio(this.currentSlideIndex);
+                        return;
+                    }
+
+                    this.ttsLoading = true;
+
+                    if (this.selectedVoiceType === 'gemini') {
+                        try {
+                            await this.playGeminiTTS(scriptText, this.selectedVoice);
+                        } catch (err) {
+                            console.warn("Gemini TTS API Unavailable, switching to Browser SpeechSynthesis Fallback:", err);
+                            this.playBrowserTTS(scriptText);
+                        } finally {
+                            this.ttsLoading = false;
+                        }
+                    } else {
+                        this.playBrowserTTS(scriptText);
+                        this.ttsLoading = false;
+                    }
+                },
+
+                playCustomAudio(index) {
+                    const custom = this.customAudioMap[index];
+                    if (!custom || !custom.url) return;
+
+                    const audio = new Audio(custom.url);
+                    this.currentAudioSource = audio;
+                    this.isSpeaking = true;
+
+                    audio.onended = () => {
+                        this.isSpeaking = false;
+                        this.currentAudioSource = null;
+                        if (this.autoplay && this.currentSlideIndex < this.slides.length - 1) {
+                            setTimeout(() => this.nextSlide(), 800);
+                        }
+                    };
+
+                    audio.onerror = () => {
+                        this.isSpeaking = false;
+                        this.currentAudioSource = null;
+                    };
+
+                    audio.play().catch(err => console.error("Error playing custom audio file:", err));
+                },
+
+                async playGeminiTTS(text, voiceName) {
+                    const apiKey = "";
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+
+                    const promptText = `Say cheerfully and clearly in fluent Czech: ${text}`;
+
+                    const payload = {
+                        contents: [{
+                            parts: [{ text: promptText }]
+                        }],
+                        generationConfig: {
+                            responseModalities: ["AUDIO"],
+                            speechConfig: {
+                                voiceConfig: {
+                                    prebuiltVoiceConfig: { voiceName: voiceName }
+                                }
+                            }
+                        }
+                    };
+
+                    let res = null;
+                    let retries = 0;
+                    while (retries < 2) {
+                        try {
+                            res = await fetch(apiUrl, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(payload)
+                            });
+                            if (res.ok) break;
+                            throw new Error("HTTP error " + res.status);
+                        } catch (e) {
+                            retries++;
+                            if (retries >= 2) throw e;
+                            await new Promise(r => setTimeout(r, 1000));
+                        }
+                    }
+
+                    const data = await res.json();
+                    const part = data?.candidates?.[0]?.content?.parts?.[0];
+                    const base64Audio = part?.inlineData?.data;
+                    const mimeType = part?.inlineData?.mimeType || "audio/L16;rate=24000";
+
+                    if (!base64Audio) throw new Error("No audio data returned from Gemini TTS");
+
+                    let sampleRate = 24000;
+                    const match = mimeType.match(/rate=(\d+)/);
+                    if (match && match[1]) {
+                        sampleRate = parseInt(match[1], 10);
+                    }
+
+                    const pcmData = this.base64ToArrayBuffer(base64Audio);
+                    const pcm16 = new Int16Array(pcmData);
+                    const wavBlob = this.pcmToWav(pcm16, sampleRate);
+                    const audioUrl = URL.createObjectURL(wavBlob);
+
+                    this.audioCache[this.currentSlideIndex] = {
+                        url: audioUrl,
+                        blob: wavBlob,
+                        voice: voiceName,
+                        filename: `stoicky_simulator_slide_${this.currentSlideIndex + 1}_${voiceName.toLowerCase()}.wav`
+                    };
+
+                    const audio = new Audio(audioUrl);
+                    this.currentAudioSource = audio;
+                    this.isSpeaking = true;
+
+                    audio.onended = () => {
+                        this.isSpeaking = false;
+                        this.currentAudioSource = null;
+                        if (this.autoplay && this.currentSlideIndex < this.slides.length - 1) {
+                            setTimeout(() => this.nextSlide(), 800);
+                        }
+                    };
+
+                    audio.onerror = () => {
+                        this.isSpeaking = false;
+                        this.currentAudioSource = null;
+                    };
+
+                    await audio.play();
+                },
+
+                playCachedAudio(index) {
+                    const cached = this.audioCache[index];
+                    if (!cached || !cached.url) return;
+
+                    const audio = new Audio(cached.url);
+                    this.currentAudioSource = audio;
+                    this.isSpeaking = true;
+
+                    audio.onended = () => {
+                        this.isSpeaking = false;
+                        this.currentAudioSource = null;
+                        if (this.autoplay && this.currentSlideIndex < this.slides.length - 1) {
+                            setTimeout(() => this.nextSlide(), 800);
+                        }
+                    };
+
+                    audio.onerror = () => {
+                        this.isSpeaking = false;
+                        this.currentAudioSource = null;
+                    };
+
+                    audio.play();
+                },
+
+                playBrowserTTS(text) {
+                    if (!('speechSynthesis' in window)) {
+                        alert("Váš prohlížeč nepodporuje hlasové předčítání.");
+                        return;
+                    }
+
+                    window.speechSynthesis.cancel();
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = 'cs-CZ';
+                    utterance.rate = 1.0;
+
+                    utterance.onstart = () => {
+                        this.isSpeaking = true;
+                    };
+
+                    utterance.onend = () => {
+                        this.isSpeaking = false;
+                        if (this.autoplay && this.currentSlideIndex < this.slides.length - 1) {
+                            setTimeout(() => this.nextSlide(), 800);
+                        }
+                    };
+
+                    utterance.onerror = () => {
+                        this.isSpeaking = false;
+                    };
+
+                    window.speechSynthesis.speak(utterance);
+                },
+
+                stopAudio() {
+                    if (this.currentAudioSource) {
+                        try {
+                            this.currentAudioSource.pause();
+                            this.currentAudioSource = null;
+                        } catch(e) {}
+                    }
+                    if ('speechSynthesis' in window) {
+                        window.speechSynthesis.cancel();
+                    }
+                    this.isSpeaking = false;
+                    this.ttsLoading = false;
+                },
+
+                base64ToArrayBuffer(base64) {
+                    const binaryString = window.atob(base64);
+                    const len = binaryString.length;
+                    const bytes = new Uint8Array(len);
+                    for (let i = 0; i < len; i++) {
+                        bytes[i] = binaryString.charCodeAt(i);
+                    }
+                    return bytes.buffer;
+                },
+
+                pcmToWav(pcm16, sampleRate = 24000) {
+                    const numChannels = 1;
+                    const bytesPerSample = 2;
+                    const blockAlign = numChannels * bytesPerSample;
+                    const byteRate = sampleRate * blockAlign;
+                    const dataSize = pcm16.length * bytesPerSample;
+                    const buffer = new ArrayBuffer(44 + dataSize);
+                    const view = new DataView(buffer);
+
+                    // RIFF chunk descriptor
+                    this.writeString(view, 0, 'RIFF');
+                    view.setUint32(4, 36 + dataSize, true);
+                    this.writeString(view, 8, 'WAVE');
+
+                    // fmt sub-chunk
+                    this.writeString(view, 12, 'fmt ');
+                    view.setUint32(16, 16, true);
+                    view.setUint16(20, 1, true); // Linear PCM
+                    view.setUint16(22, numChannels, true);
+                    view.setUint32(24, sampleRate, true);
+                    view.setUint32(28, byteRate, true);
+                    view.setUint16(32, blockAlign, true);
+                    view.setUint16(34, 16, true); // Bits per sample
+
+                    // data sub-chunk
+                    this.writeString(view, 36, 'data');
+                    view.setUint32(40, dataSize, true);
+
+                    // Write PCM samples
+                    let offset = 44;
+                    for (let i = 0; i < pcm16.length; i++, offset += 2) {
+                        view.setInt16(offset, pcm16[i], true);
+                    }
+
+                    return new Blob([buffer], { type: 'audio/wav' });
+                },
+
+                writeString(view, offset, string) {
+                    for (let i = 0; i < string.length; i++) {
+                        view.setUint8(offset + i, string.charCodeAt(i));
+                    }
+                },
+
+                init() {
+                    window.addEventListener('keydown', (e) => {
+                        if (e.key === 'ArrowRight' || e.key === ' ') {
+                            e.preventDefault();
+                            this.nextSlide();
+                        } else if (e.key === 'ArrowLeft') {
+                            e.preventDefault();
+                            this.prevSlide();
+                        }
+                    });
+                }
+            };
+        }
+    </script>
 </body>
 </html>

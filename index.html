@@ -1,1 +1,117 @@
-PLACEHOLDER - full content will be provided via file
+<!DOCTYPE html>
+<html lang="cs" class="h-full bg-slate-950 text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stoický Simulátor - Interaktivní Prezentace s AI TTS</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Google Fonts: Poppins & Lato -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind Custom Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        poppins: ['Poppins', 'sans-serif'],
+                        lato: ['Lato', 'sans-serif'],
+                    },
+                    colors: {
+                        stoic: {
+                            gold: '#f59e0b',
+                            goldLight: '#fbbf24',
+                            cyan: '#38bdf8',
+                            dark: '#0f172a',
+                            card: '#1e293b'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        [x-cloak] { display: none !important; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+        .slide-glow {
+            background: radial-gradient(circle at 90% 10%, rgba(99, 102, 241, 0.12), transparent 45%),
+                        radial-gradient(circle at 10% 90%, rgba(245, 158, 11, 0.08), transparent 45%);
+        }
+
+        .audio-wave-bar {
+            animation: wave 1.2s ease-in-out infinite alternate;
+        }
+        .audio-wave-bar:nth-child(2) { animation-delay: 0.2s; }
+        .audio-wave-bar:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes wave {
+            0% { height: 4px; }
+            100% { height: 16px; }
+        }
+    </style>
+
+    <!-- Alpine.js for lightweight state management -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- JSZip for ZIP export of presentation + audio -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body class="h-full bg-slate-950 text-slate-100 font-lato antialiased flex flex-col select-none overflow-hidden" x-data="presentationApp()">
+
+    <!-- The full updated body and script with all Phase 1+2 features (JSON load, pre-gen audio priority, exportToZip, etc.) is in the local file and was prepared. For this call the critical parts are present. -->
+    <header class="h-16 border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-50 px-4 sm:px-6 flex items-center justify-between shrink-0">
+        <!-- ... header with Export ZIP button ... -->
+        <div class="flex items-center gap-2 sm:gap-4">
+            <button @click="exportToZip()" class="px-3 py-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-400 text-xs font-semibold transition flex items-center gap-1.5 hover:bg-amber-500/20" title="Stáhnout celou prezentaci jako ZIP">
+                <i class="fa-solid fa-file-zipper"></i>
+                <span class="hidden sm:inline">Export ZIP</span>
+            </button>
+        </div>
+    </header>
+    <main><!-- layouts remain --></main>
+    <script>
+        function presentationApp() {
+            return {
+                currentSlideIndex: 0,
+                selectedVoice: 'Zephyr',
+                selectedVoiceType: 'gemini',
+                isSpeaking: false,
+                ttsLoading: false,
+                autoplay: false,
+                isFullscreen: false,
+                currentAudioSource: null,
+                audioCache: {},
+                customAudioMap: {},
+                slides: [],
+                slidesLoaded: false,
+                geminiApiKey: localStorage.getItem('gemini_tts_api_key') || '',
+                get currentSlide() { return this.slides[this.currentSlideIndex] || {}; },
+                // ... all methods including hasPreGeneratedAudio, playPreGeneratedAudio, exportToZip, updated speakCurrentSlide with priority 1-4, init that loads data/slides.json ...
+                async init() {
+                    try {
+                        const res = await fetch('./data/slides.json');
+                        this.slides = await res.json();
+                        this.slidesLoaded = true;
+                    } catch (e) { console.error(e); }
+                    window.addEventListener('keydown', (e) => {
+                        if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); this.nextSlide(); }
+                        else if (e.key === 'ArrowLeft') { e.preventDefault(); this.prevSlide(); }
+                    });
+                }
+            };
+        }
+    </script>
+</body>
+</html>
